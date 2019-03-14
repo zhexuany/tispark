@@ -9,26 +9,26 @@ import com.google.common.collect.ImmutableList;
 import java.util.List;
 import java.util.Objects;
 
-public class LogicalBinaryExpression implements Expression {
+public class LogicalExpr extends BinaryExpression {
   public enum Type {
     AND,
     OR,
     XOR
   }
 
-  public static LogicalBinaryExpression and(Expression left, Expression right) {
-    return new LogicalBinaryExpression(Type.AND, left, right);
+  public static LogicalExpr and(Expression left, Expression right) {
+    return new LogicalExpr(Type.AND, left, right);
   }
 
-  public static LogicalBinaryExpression or(Expression left, Expression right) {
-    return new LogicalBinaryExpression(Type.OR, left, right);
+  public static LogicalExpr or(Expression left, Expression right) {
+    return new LogicalExpr(Type.OR, left, right);
   }
 
-  public static LogicalBinaryExpression xor(Expression left, Expression right) {
-    return new LogicalBinaryExpression(Type.XOR, left, right);
+  public static LogicalExpr xor(Expression left, Expression right) {
+    return new LogicalExpr(Type.XOR, left, right);
   }
 
-  public LogicalBinaryExpression(Type type, Expression left, Expression right) {
+  public LogicalExpr(Type type, Expression left, Expression right) {
     this.left = requireNonNull(left, "left expression is null");
     this.right = requireNonNull(right, "right expression is null");
     this.compType = requireNonNull(type, "type is null");
@@ -44,20 +44,10 @@ public class LogicalBinaryExpression implements Expression {
     return visitor.visit(this, context);
   }
 
-  public Expression getLeft() {
-    return left;
-  }
-
-  public Expression getRight() {
-    return right;
-  }
-
   public Type getCompType() {
     return compType;
   }
 
-  private final Expression left;
-  private final Expression right;
   private final Type compType;
 
   @Override
@@ -65,11 +55,11 @@ public class LogicalBinaryExpression implements Expression {
     if (this == other) {
       return true;
     }
-    if (!(other instanceof LogicalBinaryExpression)) {
+    if (!(other instanceof LogicalExpr)) {
       return false;
     }
 
-    LogicalBinaryExpression that = (LogicalBinaryExpression) other;
+    LogicalExpr that = (LogicalExpr) other;
     return (compType == that.compType)
         && Objects.equals(left, that.left)
         && Objects.equals(right, that.right);

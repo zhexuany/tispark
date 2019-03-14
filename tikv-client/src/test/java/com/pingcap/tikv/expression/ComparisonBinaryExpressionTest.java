@@ -15,15 +15,15 @@
 
 package com.pingcap.tikv.expression;
 
-import static com.pingcap.tikv.expression.ArithmeticBinaryExpression.divide;
-import static com.pingcap.tikv.expression.ComparisonBinaryExpression.NormalizedPredicate;
-import static com.pingcap.tikv.expression.ComparisonBinaryExpression.Type;
-import static com.pingcap.tikv.expression.ComparisonBinaryExpression.equal;
-import static com.pingcap.tikv.expression.ComparisonBinaryExpression.greaterEqual;
-import static com.pingcap.tikv.expression.ComparisonBinaryExpression.greaterThan;
-import static com.pingcap.tikv.expression.ComparisonBinaryExpression.lessEqual;
-import static com.pingcap.tikv.expression.ComparisonBinaryExpression.lessThan;
-import static com.pingcap.tikv.expression.ComparisonBinaryExpression.notEqual;
+import static com.pingcap.tikv.expression.ArithmeticExpr.divide;
+import static com.pingcap.tikv.expression.ComparisonExpr.NormalizedPredicate;
+import static com.pingcap.tikv.expression.ComparisonExpr.Type;
+import static com.pingcap.tikv.expression.ComparisonExpr.equal;
+import static com.pingcap.tikv.expression.ComparisonExpr.greaterEqual;
+import static com.pingcap.tikv.expression.ComparisonExpr.greaterThan;
+import static com.pingcap.tikv.expression.ComparisonExpr.lessEqual;
+import static com.pingcap.tikv.expression.ComparisonExpr.lessThan;
+import static com.pingcap.tikv.expression.ComparisonExpr.notEqual;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
 
@@ -49,7 +49,7 @@ public class ComparisonBinaryExpressionTest {
   }
 
   private void verifyNormalize(
-      ComparisonBinaryExpression cond, String colName, Object value, DataType dataType, Type type) {
+      ComparisonExpr cond, String colName, Object value, DataType dataType, Type type) {
     NormalizedPredicate normCond = cond.normalize();
     assertEquals(colName, normCond.getColumnRef().getName());
     assertEquals(value, normCond.getValue().getValue());
@@ -63,7 +63,7 @@ public class ComparisonBinaryExpressionTest {
     ColumnRef col1 = ColumnRef.create("c1", table);
     Constant c1 = Constant.create(1, IntegerType.INT);
     // index col = c1, long
-    ComparisonBinaryExpression cond = equal(col1, c1);
+    ComparisonExpr cond = equal(col1, c1);
     verifyNormalize(cond, "c1", 1, IntegerType.INT, Type.EQUAL);
 
     cond = lessEqual(c1, col1);

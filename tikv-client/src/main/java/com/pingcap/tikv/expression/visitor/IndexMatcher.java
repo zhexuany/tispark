@@ -18,7 +18,7 @@ package com.pingcap.tikv.expression.visitor;
 import static java.util.Objects.requireNonNull;
 
 import com.pingcap.tikv.expression.*;
-import com.pingcap.tikv.expression.ComparisonBinaryExpression.NormalizedPredicate;
+import com.pingcap.tikv.expression.ComparisonExpr.NormalizedPredicate;
 import com.pingcap.tikv.meta.TiIndexColumn;
 
 /**
@@ -58,7 +58,7 @@ public class IndexMatcher extends DefaultVisitor<Boolean, Void> {
   }
 
   @Override
-  protected Boolean visit(ComparisonBinaryExpression node, Void context) {
+  protected Boolean visit(ComparisonExpr node, Void context) {
     switch (node.getComparisonType()) {
       case LESS_THAN:
       case LESS_EQUAL:
@@ -95,7 +95,7 @@ public class IndexMatcher extends DefaultVisitor<Boolean, Void> {
   }
 
   @Override
-  protected Boolean visit(LogicalBinaryExpression node, Void context) {
+  protected Boolean visit(LogicalExpr node, Void context) {
     switch (node.getCompType()) {
       case AND:
         if (matchEqualTestOnly) {

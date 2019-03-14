@@ -28,7 +28,7 @@ import org.joda.time.DateTime;
 // Refactor needed.
 // Refer to https://github.com/pingcap/tipb/blob/master/go-tipb/expression.pb.go
 // TODO: This might need a refactor to accept an DataType?
-public class Constant implements Expression {
+public class Constant extends LeafExpression {
   private final Object value;
   private DataType type;
 

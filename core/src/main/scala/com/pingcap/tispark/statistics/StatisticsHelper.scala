@@ -18,7 +18,7 @@
 package com.pingcap.tispark.statistics
 
 import com.google.common.primitives.UnsignedLong
-import com.pingcap.tikv.expression.{ByItem, ColumnRef, ComparisonBinaryExpression, Constant}
+import com.pingcap.tikv.expression.{ByItem, ColumnRef, ComparisonExpr, Constant}
 import com.pingcap.tikv.key.{Key, TypedKey}
 import com.pingcap.tikv.meta.TiDAGRequest.PushDownType
 import com.pingcap.tikv.meta.{TiDAGRequest, TiTableInfo, TiTimestamp}
@@ -205,7 +205,7 @@ object StatisticsHelper {
       .newBuilder()
       .setFullTableScan(histTable)
       .addFilter(
-        ComparisonBinaryExpression
+        ComparisonExpr
           .equal(ColumnRef.create("table_id"), Constant.create(targetTblId))
       )
       .addRequiredCols(
@@ -224,7 +224,7 @@ object StatisticsHelper {
       .newBuilder()
       .setFullTableScan(metaTable)
       .addFilter(
-        ComparisonBinaryExpression
+        ComparisonExpr
           .equal(ColumnRef.create("table_id"), Constant.create(targetTblId))
       )
       .addRequiredCols(metaRequiredCols.filter(checkColExists(metaTable, _)))
@@ -238,7 +238,7 @@ object StatisticsHelper {
       .newBuilder()
       .setFullTableScan(bucketTable)
       .addFilter(
-        ComparisonBinaryExpression
+        ComparisonExpr
           .equal(ColumnRef.create("table_id"), Constant.create(targetTblId))
       )
       .setLimit(Int.MaxValue)

@@ -15,8 +15,8 @@
 
 package com.pingcap.tikv.meta;
 
-import static com.pingcap.tikv.expression.ArithmeticBinaryExpression.plus;
-import static com.pingcap.tikv.expression.ComparisonBinaryExpression.lessEqual;
+import static com.pingcap.tikv.expression.ArithmeticExpr.plus;
+import static com.pingcap.tikv.expression.ComparisonExpr.lessEqual;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 

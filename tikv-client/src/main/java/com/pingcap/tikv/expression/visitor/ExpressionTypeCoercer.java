@@ -106,7 +106,7 @@ public class ExpressionTypeCoercer extends Visitor<Pair<DataType, Double>, DataT
   }
 
   @Override
-  protected Pair<DataType, Double> visit(ComparisonBinaryExpression node, DataType targetType) {
+  protected Pair<DataType, Double> visit(ComparisonExpr node, DataType targetType) {
     if (targetType != null && !targetType.equals(IntegerType.BOOLEAN)) {
       throw new TiExpressionException(String.format("Comparison result cannot be %s", targetType));
     }
@@ -119,33 +119,32 @@ public class ExpressionTypeCoercer extends Visitor<Pair<DataType, Double>, DataT
 
   @Override
   protected Pair<DataType, Double> visit(StringRegExpression node, DataType targetType) {
-    if (targetType != null && !targetType.equals(IntegerType.BOOLEAN)) {
-      throw new TiExpressionException(String.format("Comparison result cannot be %s", targetType));
-    }
-    if (!typeMap.containsKey(node)) {
-      coerceType(null, node.getLeft(), node.getRight());
-      typeMap.put(node, IntegerType.BOOLEAN);
-    }
-    return Pair.create(IntegerType.BOOLEAN, SRING_REG_OP_CRED);
+    return binaryExprVisit(node, targetType, IntegerType.BOOLEAN, SRING_REG_OP_CRED, "StringRegExpression result cannot be %s");
   }
 
   @Override
-  protected Pair<DataType, Double> visit(ArithmeticBinaryExpression node, DataType targetType) {
+  protected Pair<DataType, Double> visit(ArithmeticExpr node, DataType targetType) {
     Pair<DataType, Double> result = coerceType(targetType, node.getLeft(), node.getRight());
     typeMap.put(node, result.first);
     return result;
   }
 
-  @Override
-  protected Pair<DataType, Double> visit(LogicalBinaryExpression node, DataType targetType) {
-    if (targetType != null && !targetType.equals(IntegerType.BOOLEAN)) {
-      throw new TiExpressionException(String.format("Comparison result cannot be %s", targetType));
+  protected Pair<DataType, Double> binaryExprVisit(BinaryExpression node, DataType targetType,
+      DataType desiredType, double cred, String formatter) {
+    if (targetType != null && !targetType.equals(desiredType)) {
+      throw new TiExpressionException(String.format(formatter, targetType));
     }
     if (!typeMap.containsKey(node)) {
       coerceType(null, node.getLeft(), node.getRight());
-      typeMap.put(node, IntegerType.BOOLEAN);
+      typeMap.put(node, desiredType);
     }
-    return Pair.create(IntegerType.BOOLEAN, LOGICAL_OP_CRED);
+    return Pair.create(desiredType, cred);
+  }
+
+  @Override
+  protected Pair<DataType, Double> visit(LogicalExpr node, DataType targetType) {
+    return binaryExprVisit(node, targetType, IntegerType.BOOLEAN, LOGICAL_OP_CRED,
+        "Comparison result cannot be %s");
   }
 
   @Override
@@ -162,34 +161,19 @@ public class ExpressionTypeCoercer extends Visitor<Pair<DataType, Double>, DataT
   @Override
   protected Pair<DataType, Double> visit(AggregateFunction node, DataType targetType) {
     FunctionType fType = node.getType();
-    coerceType(null, node.getArgument());
+    coerceType(null, node.getChild());
     switch (fType) {
       case Count:
-        {
-          if (targetType != null && targetType.equals(IntegerType.BIGINT)) {
-            throw new TiExpressionException(String.format("Count cannot be %s", targetType));
-          }
-          typeMap.put(node, IntegerType.BIGINT);
-          return Pair.create(targetType, FUNCTION_CRED);
-        }
+          unaryExprVisit(node, targetType, IntegerType.BIGINT,
+              FUNCTION_CRED, "Count cannot be %s");
       case Sum:
-        {
-          if (targetType != null && targetType.equals(DecimalType.DECIMAL)) {
-            throw new TiExpressionException(String.format("Sum cannot be %s", targetType));
-          }
-          DataType colType = node.getArgument().accept(this, null).first;
-          if (colType instanceof RealType) {
-            typeMap.put(node, RealType.DOUBLE);
-          } else {
-            typeMap.put(node, DecimalType.DECIMAL);
-          }
-          return Pair.create(targetType, FUNCTION_CRED);
-        }
+          unaryExprVisit(node, targetType, DecimalType.DECIMAL,
+              FUNCTION_CRED, "Sum cannot be %s");
       case First:
       case Max:
       case Min:
         {
-          Pair<DataType, Double> result = coerceType(targetType, node.getArgument());
+          Pair<DataType, Double> result = coerceType(targetType, node.getChild());
           typeMap.put(node, result.first);
           return result;
         }
@@ -198,27 +182,26 @@ public class ExpressionTypeCoercer extends Visitor<Pair<DataType, Double>, DataT
     }
   }
 
-  @Override
-  protected Pair<DataType, Double> visit(IsNull node, DataType targetType) {
-    if (targetType != null && !targetType.equals(IntegerType.BOOLEAN)) {
-      throw new TiExpressionException(String.format("IsNull result cannot be %s", targetType));
+  protected Pair<DataType, Double> unaryExprVisit(UnaryExpression node, DataType targetType,
+      DataType desiredType, double cred, String formatter) {
+    if (targetType != null && !targetType.equals(desiredType)) {
+      throw new TiExpressionException(String.format(formatter, targetType));
     }
     if (!typeMap.containsKey(node)) {
-      coerceType(null, node.getExpression());
-      typeMap.put(node, IntegerType.BOOLEAN);
+      coerceType(null, node.getChild());
+      typeMap.put(node, desiredType);
     }
-    return Pair.create(IntegerType.BOOLEAN, ISNULL_CRED);
+    return Pair.create(desiredType, cred);
+  }
+
+  @Override
+  protected Pair<DataType, Double> visit(IsNull node, DataType targetType) {
+    return unaryExprVisit(node, targetType, IntegerType.BOOLEAN, ISNULL_CRED, "IsNull result cannot be %s");
   }
 
   @Override
   protected Pair<DataType, Double> visit(Not node, DataType targetType) {
-    if (targetType != null && !targetType.equals(IntegerType.BOOLEAN)) {
-      throw new TiExpressionException(String.format("Not result cannot be %s", targetType));
-    }
-    if (!typeMap.containsKey(node)) {
-      coerceType(null, node.getExpression());
-      typeMap.put(node, IntegerType.BOOLEAN);
-    }
-    return Pair.create(IntegerType.BOOLEAN, NOT_CRED);
+    return unaryExprVisit(node, targetType, IntegerType.BOOLEAN, NOT_CRED,
+        "Not result cannot be %s");
   }
 }

@@ -17,7 +17,7 @@
 
 package com.pingcap.tikv.operation;
 
-import static com.pingcap.tikv.expression.ArithmeticBinaryExpression.plus;
+import static com.pingcap.tikv.expression.ArithmeticExpr.plus;
 import static com.pingcap.tikv.expression.visitor.ExpressionTypeCoercer.inferType;
 import static org.junit.Assert.assertEquals;
 

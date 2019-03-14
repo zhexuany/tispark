@@ -15,21 +15,25 @@
 
 package com.pingcap.tikv.expression.visitor;
 
-import static com.pingcap.tikv.expression.ArithmeticBinaryExpression.minus;
-import static com.pingcap.tikv.expression.ArithmeticBinaryExpression.plus;
-import static com.pingcap.tikv.expression.ComparisonBinaryExpression.equal;
-import static com.pingcap.tikv.expression.ComparisonBinaryExpression.lessThan;
-import static com.pingcap.tikv.expression.LogicalBinaryExpression.and;
+import static com.pingcap.tikv.expression.ArithmeticExpr.minus;
+import static com.pingcap.tikv.expression.ArithmeticExpr.plus;
+import static com.pingcap.tikv.expression.ComparisonExpr.equal;
+import static com.pingcap.tikv.expression.ComparisonExpr.lessThan;
+import static com.pingcap.tikv.expression.LogicalExpr.and;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.fail;
 
 import com.google.common.collect.ImmutableList;
-import com.pingcap.tikv.expression.ArithmeticBinaryExpression;
+import com.pingcap.tikv.expression.AggregateFunction;
+import com.pingcap.tikv.expression.AggregateFunction.FunctionType;
+import com.pingcap.tikv.expression.ArithmeticExpr;
 import com.pingcap.tikv.expression.ColumnRef;
-import com.pingcap.tikv.expression.ComparisonBinaryExpression;
+import com.pingcap.tikv.expression.ComparisonExpr;
 import com.pingcap.tikv.expression.Constant;
 import com.pingcap.tikv.expression.Expression;
-import com.pingcap.tikv.expression.LogicalBinaryExpression;
+import com.pingcap.tikv.expression.IsNull;
+import com.pingcap.tikv.expression.LogicalExpr;
+import com.pingcap.tikv.expression.Not;
 import com.pingcap.tikv.meta.MetaUtils;
 import com.pingcap.tikv.meta.TiTableInfo;
 import com.pingcap.tikv.types.DataType;
@@ -38,6 +42,7 @@ import com.pingcap.tikv.types.RealType;
 import com.pingcap.tikv.types.StringType;
 import com.pingcap.tikv.types.TimestampType;
 import java.util.Map;
+import org.apache.spark.sql.catalyst.expressions.Exp;
 import org.junit.Test;
 
 public class ExpressionTypeCoercerTest {
@@ -53,6 +58,42 @@ public class ExpressionTypeCoercerTest {
   }
 
   @Test
+  public void typeCoerceMisc() {
+    TiTableInfo table = createTable();
+    ColumnRef col1 = ColumnRef.create("c1", table); // INT
+
+    Expression misc = new Not(col1);
+    ExpressionTypeCoercer inf = new ExpressionTypeCoercer();
+    assertEquals(IntegerType.BOOLEAN, inf.infer(misc));
+
+    misc = new IsNull(col1);
+    assertEquals(IntegerType.BOOLEAN, inf.infer(misc));
+  }
+
+  @Test
+  public void typeVerifyWithAgg() {
+    TiTableInfo table = createTable();
+    ColumnRef col1 = ColumnRef.create("c1", table); // INT
+
+    Expression agg = AggregateFunction.newCall(FunctionType.Sum, col1);
+    ExpressionTypeCoercer inf = new ExpressionTypeCoercer();
+    assertEquals(IntegerType.INT, inf.infer(agg));
+
+
+    agg = AggregateFunction.newCall(FunctionType.Max, col1);
+    assertEquals(IntegerType.INT, inf.infer(agg));
+
+    agg = AggregateFunction.newCall(FunctionType.Count, col1);
+    assertEquals(IntegerType.INT, inf.infer(agg));
+
+    agg = AggregateFunction.newCall(FunctionType.Min, col1);
+    assertEquals(IntegerType.INT, inf.infer(agg));
+
+    agg = AggregateFunction.newCall(FunctionType.First, col1);
+    assertEquals(IntegerType.INT, inf.infer(agg));
+  }
+
+  @Test
   public void typeVerifyWithColumnRefTest() {
     TiTableInfo table = createTable();
     ColumnRef col1 = ColumnRef.create("c1", table); // INT
@@ -62,13 +103,13 @@ public class ExpressionTypeCoercerTest {
     Constant c3 = Constant.create(11.1);
     Constant c4 = Constant.create(1.1);
 
-    ArithmeticBinaryExpression ar1 = minus(col1, c1);
-    ArithmeticBinaryExpression ar2 = plus(col4, c4);
-    ComparisonBinaryExpression comp1 = equal(ar1, c2);
-    ComparisonBinaryExpression comp2 = equal(ar2, c3);
-    ComparisonBinaryExpression comp3 = equal(ar1, ar2);
-    LogicalBinaryExpression log1 = and(comp1, comp2);
-    LogicalBinaryExpression log2 = and(comp1, comp3);
+    ArithmeticExpr ar1 = minus(col1, c1);
+    ArithmeticExpr ar2 = plus(col4, c4);
+    ComparisonExpr comp1 = equal(ar1, c2);
+    ComparisonExpr comp2 = equal(ar2, c3);
+    ComparisonExpr comp3 = equal(ar1, ar2);
+    LogicalExpr log1 = and(comp1, comp2);
+    LogicalExpr log2 = and(comp1, comp3);
 
     ExpressionTypeCoercer inf = new ExpressionTypeCoercer();
     assertEquals(IntegerType.BOOLEAN, inf.infer(log1));
@@ -94,18 +135,18 @@ public class ExpressionTypeCoercerTest {
   public void typeVerifyTest() {
     Constant const1 = Constant.create(1);
     Constant const2 = Constant.create(11);
-    ComparisonBinaryExpression comp1 = equal(const1, const2);
+    ComparisonExpr comp1 = equal(const1, const2);
 
     Constant const3 = Constant.create(1.1f);
     Constant const4 = Constant.create(1.111f);
-    ComparisonBinaryExpression comp2 = lessThan(const3, const4);
+    ComparisonExpr comp2 = lessThan(const3, const4);
 
     Constant const5 = Constant.create(1);
     Constant const6 = Constant.create(1.1f);
-    ArithmeticBinaryExpression comp3 = minus(const5, const6);
+    ArithmeticExpr comp3 = minus(const5, const6);
 
-    LogicalBinaryExpression and1 = and(comp1, comp2);
-    LogicalBinaryExpression or1 = LogicalBinaryExpression.or(comp1, comp3);
+    LogicalExpr and1 = and(comp1, comp2);
+    LogicalExpr or1 = LogicalExpr.or(comp1, comp3);
 
     ExpressionTypeCoercer inf = new ExpressionTypeCoercer();
     assertEquals(IntegerType.BOOLEAN, inf.infer(and1));

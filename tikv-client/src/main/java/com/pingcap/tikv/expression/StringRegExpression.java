@@ -25,7 +25,7 @@ import com.pingcap.tikv.types.IntegerType;
 import java.util.List;
 import java.util.Objects;
 
-public class StringRegExpression implements Expression {
+public class StringRegExpression extends BinaryExpression {
   public enum Type {
     STARTS_WITH,
     CONTAINS,
@@ -76,8 +76,6 @@ public class StringRegExpression implements Expression {
     return key;
   }
 
-  private final Expression left;
-  private final Expression right;
   private final Expression reg;
   private final Type regType;
 
@@ -99,14 +97,6 @@ public class StringRegExpression implements Expression {
   @Override
   public <R, C> R accept(Visitor<R, C> visitor, C context) {
     return visitor.visit(this, context);
-  }
-
-  public Expression getLeft() {
-    return left;
-  }
-
-  public Expression getRight() {
-    return right;
   }
 
   public Type getRegType() {

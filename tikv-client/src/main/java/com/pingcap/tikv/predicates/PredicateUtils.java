@@ -15,7 +15,7 @@
 
 package com.pingcap.tikv.predicates;
 
-import static com.pingcap.tikv.expression.LogicalBinaryExpression.and;
+import static com.pingcap.tikv.expression.LogicalExpr.and;
 import static java.util.Objects.requireNonNull;
 
 import com.google.common.collect.ImmutableList;

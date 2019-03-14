@@ -31,7 +31,7 @@ public class DefaultVisitor<R, C> extends Visitor<R, C> {
   }
 
   @Override
-  protected R visit(ComparisonBinaryExpression node, C context) {
+  protected R visit(ComparisonExpr node, C context) {
     return process(node, context);
   }
 
@@ -41,12 +41,12 @@ public class DefaultVisitor<R, C> extends Visitor<R, C> {
   }
 
   @Override
-  protected R visit(ArithmeticBinaryExpression node, C context) {
+  protected R visit(ArithmeticExpr node, C context) {
     return process(node, context);
   }
 
   @Override
-  protected R visit(LogicalBinaryExpression node, C context) {
+  protected R visit(LogicalExpr node, C context) {
     return process(node, context);
   }
 

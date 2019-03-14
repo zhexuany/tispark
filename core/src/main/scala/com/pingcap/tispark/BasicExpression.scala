@@ -71,22 +71,22 @@ object BasicExpression {
         Some(Constant.create(convertLiteral(value, dataType)))
 
       case Add(BasicExpression(lhs), BasicExpression(rhs)) =>
-        Some(ArithmeticBinaryExpression.plus(lhs, rhs))
+        Some(ArithmeticExpr.plus(lhs, rhs))
 
       case Subtract(BasicExpression(lhs), BasicExpression(rhs)) =>
-        Some(ArithmeticBinaryExpression.minus(lhs, rhs))
+        Some(ArithmeticExpr.minus(lhs, rhs))
 
       case Multiply(BasicExpression(lhs), BasicExpression(rhs)) =>
-        Some(ArithmeticBinaryExpression.multiply(lhs, rhs))
+        Some(ArithmeticExpr.multiply(lhs, rhs))
 
       case Divide(BasicExpression(lhs), BasicExpression(rhs)) =>
-        Some(ArithmeticBinaryExpression.divide(lhs, rhs))
+        Some(ArithmeticExpr.divide(lhs, rhs))
 
       case And(BasicExpression(lhs), BasicExpression(rhs)) =>
-        Some(LogicalBinaryExpression.and(lhs, rhs))
+        Some(LogicalExpr.and(lhs, rhs))
 
       case Or(BasicExpression(lhs), BasicExpression(rhs)) =>
-        Some(LogicalBinaryExpression.or(lhs, rhs))
+        Some(LogicalExpr.or(lhs, rhs))
 
       case Alias(BasicExpression(child), _) =>
         Some(child)
@@ -98,22 +98,22 @@ object BasicExpression {
         Some(new TiNot(new TiIsNull(child)))
 
       case GreaterThan(BasicExpression(lhs), BasicExpression(rhs)) =>
-        Some(ComparisonBinaryExpression.greaterThan(lhs, rhs))
+        Some(ComparisonExpr.greaterThan(lhs, rhs))
 
       case GreaterThanOrEqual(BasicExpression(lhs), BasicExpression(rhs)) =>
-        Some(ComparisonBinaryExpression.greaterEqual(lhs, rhs))
+        Some(ComparisonExpr.greaterEqual(lhs, rhs))
 
       case LessThan(BasicExpression(lhs), BasicExpression(rhs)) =>
-        Some(ComparisonBinaryExpression.lessThan(lhs, rhs))
+        Some(ComparisonExpr.lessThan(lhs, rhs))
 
       case LessThanOrEqual(BasicExpression(lhs), BasicExpression(rhs)) =>
-        Some(ComparisonBinaryExpression.lessEqual(lhs, rhs))
+        Some(ComparisonExpr.lessEqual(lhs, rhs))
 
       case EqualTo(BasicExpression(lhs), BasicExpression(rhs)) =>
-        Some(ComparisonBinaryExpression.equal(lhs, rhs))
+        Some(ComparisonExpr.equal(lhs, rhs))
 
       case Not(EqualTo(BasicExpression(lhs), BasicExpression(rhs))) =>
-        Some(ComparisonBinaryExpression.notEqual(lhs, rhs))
+        Some(ComparisonExpr.notEqual(lhs, rhs))
 
       case Not(BasicExpression(child)) =>
         Some(new TiNot(child))

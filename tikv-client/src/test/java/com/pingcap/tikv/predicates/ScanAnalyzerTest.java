@@ -15,8 +15,8 @@
 
 package com.pingcap.tikv.predicates;
 
-import static com.pingcap.tikv.expression.ComparisonBinaryExpression.*;
-import static com.pingcap.tikv.expression.LogicalBinaryExpression.*;
+import static com.pingcap.tikv.expression.ComparisonExpr.*;
+import static com.pingcap.tikv.expression.LogicalExpr.*;
 import static com.pingcap.tikv.predicates.PredicateUtils.expressionToIndexRanges;
 import static java.util.Objects.requireNonNull;
 import static org.junit.Assert.*;

@@ -20,13 +20,13 @@ package com.pingcap.tikv.expression;
 public abstract class Visitor<R, C> {
   protected abstract R visit(ColumnRef node, C context);
 
-  protected abstract R visit(ComparisonBinaryExpression node, C context);
+  protected abstract R visit(ComparisonExpr node, C context);
 
   protected abstract R visit(StringRegExpression node, C context);
 
-  protected abstract R visit(ArithmeticBinaryExpression node, C context);
+  protected abstract R visit(ArithmeticExpr node, C context);
 
-  protected abstract R visit(LogicalBinaryExpression node, C context);
+  protected abstract R visit(LogicalExpr node, C context);
 
   protected abstract R visit(Constant node, C context);
 

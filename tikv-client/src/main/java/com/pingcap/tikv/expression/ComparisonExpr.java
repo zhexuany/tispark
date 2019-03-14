@@ -16,7 +16,7 @@
 package com.pingcap.tikv.expression;
 
 import static com.google.common.base.Preconditions.checkArgument;
-import static com.pingcap.tikv.expression.ComparisonBinaryExpression.Type.*;
+import static com.pingcap.tikv.expression.ComparisonExpr.Type.*;
 import static java.util.Objects.requireNonNull;
 
 import com.google.common.collect.ImmutableList;
@@ -27,7 +27,7 @@ import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 
-public class ComparisonBinaryExpression implements Expression {
+public class ComparisonExpr extends BinaryExpression {
   public enum Type {
     EQUAL,
     NOT_EQUAL,
@@ -37,35 +37,35 @@ public class ComparisonBinaryExpression implements Expression {
     GREATER_EQUAL
   }
 
-  public static ComparisonBinaryExpression equal(Expression left, Expression right) {
-    return new ComparisonBinaryExpression(EQUAL, left, right);
+  public static ComparisonExpr equal(Expression left, Expression right) {
+    return new ComparisonExpr(EQUAL, left, right);
   }
 
-  public static ComparisonBinaryExpression notEqual(Expression left, Expression right) {
-    return new ComparisonBinaryExpression(NOT_EQUAL, left, right);
+  public static ComparisonExpr notEqual(Expression left, Expression right) {
+    return new ComparisonExpr(NOT_EQUAL, left, right);
   }
 
-  public static ComparisonBinaryExpression lessThan(Expression left, Expression right) {
-    return new ComparisonBinaryExpression(LESS_THAN, left, right);
+  public static ComparisonExpr lessThan(Expression left, Expression right) {
+    return new ComparisonExpr(LESS_THAN, left, right);
   }
 
-  public static ComparisonBinaryExpression lessEqual(Expression left, Expression right) {
-    return new ComparisonBinaryExpression(LESS_EQUAL, left, right);
+  public static ComparisonExpr lessEqual(Expression left, Expression right) {
+    return new ComparisonExpr(LESS_EQUAL, left, right);
   }
 
-  public static ComparisonBinaryExpression greaterThan(Expression left, Expression right) {
-    return new ComparisonBinaryExpression(GREATER_THAN, left, right);
+  public static ComparisonExpr greaterThan(Expression left, Expression right) {
+    return new ComparisonExpr(GREATER_THAN, left, right);
   }
 
-  public static ComparisonBinaryExpression greaterEqual(Expression left, Expression right) {
-    return new ComparisonBinaryExpression(GREATER_EQUAL, left, right);
+  public static ComparisonExpr greaterEqual(Expression left, Expression right) {
+    return new ComparisonExpr(GREATER_EQUAL, left, right);
   }
 
   public static class NormalizedPredicate {
-    private final ComparisonBinaryExpression pred;
+    private final ComparisonExpr pred;
     private TypedKey key;
 
-    NormalizedPredicate(ComparisonBinaryExpression pred) {
+    NormalizedPredicate(ComparisonExpr pred) {
       checkArgument(pred.getLeft() instanceof ColumnRef);
       checkArgument(pred.getRight() instanceof Constant);
       this.pred = pred;
@@ -95,12 +95,10 @@ public class ComparisonBinaryExpression implements Expression {
     }
   }
 
-  private final Expression left;
-  private final Expression right;
   private final Type compType;
   private transient Optional<NormalizedPredicate> normalizedPredicate;
 
-  public ComparisonBinaryExpression(Type type, Expression left, Expression right) {
+  public ComparisonExpr(Type type, Expression left, Expression right) {
     this.left = requireNonNull(left, "left expression is null");
     this.right = requireNonNull(right, "right expression is null");
     this.compType = requireNonNull(type, "type is null");
@@ -114,14 +112,6 @@ public class ComparisonBinaryExpression implements Expression {
   @Override
   public <R, C> R accept(Visitor<R, C> visitor, C context) {
     return visitor.visit(this, context);
-  }
-
-  public Expression getLeft() {
-    return left;
-  }
-
-  public Expression getRight() {
-    return right;
   }
 
   public Type getComparisonType() {
@@ -160,8 +150,7 @@ public class ComparisonBinaryExpression implements Expression {
               String.format(
                   "PredicateNormalizer is not able to process type %s", getComparisonType()));
       }
-      ComparisonBinaryExpression newExpression =
-          new ComparisonBinaryExpression(newType, right, left);
+      ComparisonExpr newExpression = new ComparisonExpr(newType, right, left);
       normalizedPredicate = Optional.of(new NormalizedPredicate(newExpression));
       return normalizedPredicate.get();
     } else if (getRight() instanceof Constant && getLeft() instanceof ColumnRef) {
@@ -182,11 +171,11 @@ public class ComparisonBinaryExpression implements Expression {
     if (this == other) {
       return true;
     }
-    if (!(other instanceof ComparisonBinaryExpression)) {
+    if (!(other instanceof ComparisonExpr)) {
       return false;
     }
 
-    ComparisonBinaryExpression that = (ComparisonBinaryExpression) other;
+    ComparisonExpr that = (ComparisonExpr) other;
     return (compType == that.compType)
         && Objects.equals(left, that.left)
         && Objects.equals(right, that.right);

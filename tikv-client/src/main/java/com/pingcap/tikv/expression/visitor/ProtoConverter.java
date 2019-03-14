@@ -116,7 +116,7 @@ public class ProtoConverter extends Visitor<Expr, Object> {
   }
 
   @Override
-  protected Expr visit(LogicalBinaryExpression node, Object context) {
+  protected Expr visit(LogicalExpr node, Object context) {
     ScalarFuncSig protoSig;
     switch (node.getCompType()) {
       case AND:
@@ -138,7 +138,7 @@ public class ProtoConverter extends Visitor<Expr, Object> {
   }
 
   @Override
-  protected Expr visit(ArithmeticBinaryExpression node, Object context) {
+  protected Expr visit(ArithmeticExpr node, Object context) {
     // assume after type coerce, children should be compatible
     Expression child = node.getLeft();
     String typeSignature = getTypeSignature(child);
@@ -176,7 +176,7 @@ public class ProtoConverter extends Visitor<Expr, Object> {
   }
 
   @Override
-  protected Expr visit(ComparisonBinaryExpression node, Object context) {
+  protected Expr visit(ComparisonExpr node, Object context) {
     // assume after type coerce, children should be compatible
     Expression child = node.getLeft();
     String typeSignature = getTypeSignature(child);
@@ -299,7 +299,7 @@ public class ProtoConverter extends Visitor<Expr, Object> {
 
   @Override
   protected Expr visit(IsNull node, Object context) {
-    String typeSignature = getTypeSignature(node.getExpression());
+    String typeSignature = getTypeSignature(node.getChild());
     ScalarFuncSig protoSig = ScalarFuncSig.valueOf(typeSignature + "IsNull");
     Expr.Builder builder = scalaToPartialProto(node, context);
     builder.setSig(protoSig);

@@ -15,9 +15,9 @@
 
 package com.pingcap.tikv.expression.visitor;
 
-import com.pingcap.tikv.expression.ComparisonBinaryExpression;
+import com.pingcap.tikv.expression.ComparisonExpr;
 import com.pingcap.tikv.expression.Expression;
-import com.pingcap.tikv.expression.LogicalBinaryExpression;
+import com.pingcap.tikv.expression.LogicalExpr;
 
 public class PseudoCostCalculator extends DefaultVisitor<Double, Void> {
   public static double calculateCost(Expression expr) {
@@ -31,7 +31,7 @@ public class PseudoCostCalculator extends DefaultVisitor<Double, Void> {
   }
 
   @Override
-  protected Double visit(LogicalBinaryExpression node, Void context) {
+  protected Double visit(LogicalExpr node, Void context) {
     double leftCost = node.getLeft().accept(this, context);
     double rightCost = node.getLeft().accept(this, context);
     switch (node.getCompType()) {
@@ -46,7 +46,7 @@ public class PseudoCostCalculator extends DefaultVisitor<Double, Void> {
   }
 
   @Override
-  protected Double visit(ComparisonBinaryExpression node, Void context) {
+  protected Double visit(ComparisonExpr node, Void context) {
     switch (node.getComparisonType()) {
       case EQUAL:
         return 0.01;

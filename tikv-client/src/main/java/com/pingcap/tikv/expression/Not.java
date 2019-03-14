@@ -21,25 +21,19 @@ import com.google.common.collect.ImmutableList;
 import java.util.List;
 import java.util.Objects;
 
-public class Not implements Expression {
+public class Not extends UnaryExpression {
 
   public static Not not(Expression expression) {
     return new Not(expression);
   }
 
-  private Expression expression;
-
   public Not(Expression expression) {
-    this.expression = requireNonNull(expression, "expression is null");
-  }
-
-  public Expression getExpression() {
-    return expression;
+    this.child = requireNonNull(expression, "expression is null");
   }
 
   @Override
   public List<Expression> getChildren() {
-    return ImmutableList.of(expression);
+    return ImmutableList.of(child);
   }
 
   @Override
@@ -49,7 +43,7 @@ public class Not implements Expression {
 
   @Override
   public String toString() {
-    return String.format("Not(%s)", getExpression());
+    return String.format("Not(%s)", this.child);
   }
 
   @Override
@@ -62,11 +56,6 @@ public class Not implements Expression {
     }
 
     Not that = (Not) other;
-    return Objects.equals(expression, that.expression);
-  }
-
-  @Override
-  public int hashCode() {
-    return Objects.hashCode(expression);
+    return Objects.equals(child, that.child);
   }
 }

@@ -22,7 +22,7 @@ import com.google.common.collect.ImmutableList;
 import java.util.List;
 import java.util.Objects;
 
-public class AggregateFunction implements Expression {
+public class AggregateFunction extends UnaryExpression {
   public enum FunctionType {
     Sum,
     Count,
@@ -32,28 +32,22 @@ public class AggregateFunction implements Expression {
   }
 
   private final FunctionType type;
-  private final Expression argument;
-
   public static AggregateFunction newCall(FunctionType type, Expression argument) {
     return new AggregateFunction(type, argument);
   }
 
   private AggregateFunction(FunctionType type, Expression argument) {
     this.type = requireNonNull(type, "function type is null");
-    this.argument = requireNonNull(argument, "function argument is null");
+    this.child = requireNonNull(argument, "function argument is null");
   }
 
   public FunctionType getType() {
     return type;
   }
 
-  public Expression getArgument() {
-    return argument;
-  }
-
   @Override
   public List<Expression> getChildren() {
-    return ImmutableList.of(argument);
+    return ImmutableList.of(this.child);
   }
 
   @Override
@@ -71,12 +65,12 @@ public class AggregateFunction implements Expression {
     }
 
     AggregateFunction that = (AggregateFunction) other;
-    return type == that.type && Objects.equals(argument, that.argument);
+    return type == that.type && Objects.equals(child, that.child);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(type, argument);
+    return Objects.hash(type, child);
   }
 
   @Override

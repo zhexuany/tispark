@@ -15,12 +15,12 @@
 
 package com.pingcap.tikv.predicates;
 
-import static com.pingcap.tikv.expression.ComparisonBinaryExpression.equal;
-import static com.pingcap.tikv.expression.ComparisonBinaryExpression.greaterEqual;
-import static com.pingcap.tikv.expression.ComparisonBinaryExpression.lessEqual;
-import static com.pingcap.tikv.expression.ComparisonBinaryExpression.lessThan;
-import static com.pingcap.tikv.expression.LogicalBinaryExpression.and;
-import static com.pingcap.tikv.expression.LogicalBinaryExpression.or;
+import static com.pingcap.tikv.expression.ComparisonExpr.equal;
+import static com.pingcap.tikv.expression.ComparisonExpr.greaterEqual;
+import static com.pingcap.tikv.expression.ComparisonExpr.lessEqual;
+import static com.pingcap.tikv.expression.ComparisonExpr.lessThan;
+import static com.pingcap.tikv.expression.LogicalExpr.and;
+import static com.pingcap.tikv.expression.LogicalExpr.or;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 

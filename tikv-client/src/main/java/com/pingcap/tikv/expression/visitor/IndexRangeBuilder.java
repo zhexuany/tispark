@@ -20,7 +20,7 @@ import com.google.common.collect.RangeSet;
 import com.google.common.collect.TreeRangeSet;
 import com.pingcap.tikv.exception.TiExpressionException;
 import com.pingcap.tikv.expression.*;
-import com.pingcap.tikv.expression.ComparisonBinaryExpression.NormalizedPredicate;
+import com.pingcap.tikv.expression.ComparisonExpr.NormalizedPredicate;
 import com.pingcap.tikv.key.TypedKey;
 import com.pingcap.tikv.meta.TiIndexColumn;
 import com.pingcap.tikv.meta.TiIndexInfo;
@@ -62,7 +62,7 @@ public class IndexRangeBuilder extends DefaultVisitor<RangeSet<TypedKey>, Void> 
   }
 
   @Override
-  protected RangeSet<TypedKey> visit(LogicalBinaryExpression node, Void context) {
+  protected RangeSet<TypedKey> visit(LogicalExpr node, Void context) {
     RangeSet<TypedKey> leftRanges = node.getLeft().accept(this, context);
     RangeSet<TypedKey> rightRanges = node.getRight().accept(this, context);
     switch (node.getCompType()) {
@@ -91,7 +91,7 @@ public class IndexRangeBuilder extends DefaultVisitor<RangeSet<TypedKey>, Void> 
   }
 
   @Override
-  protected RangeSet<TypedKey> visit(ComparisonBinaryExpression node, Void context) {
+  protected RangeSet<TypedKey> visit(ComparisonExpr node, Void context) {
     NormalizedPredicate predicate = node.normalize();
     if (predicate == null) {
       throwOnError(node);

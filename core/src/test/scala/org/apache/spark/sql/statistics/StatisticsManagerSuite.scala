@@ -18,7 +18,7 @@
 package org.apache.spark.sql.statistics
 
 import com.google.common.collect.ImmutableList
-import com.pingcap.tikv.expression.ComparisonBinaryExpression._
+import com.pingcap.tikv.expression.ComparisonExpr._
 import com.pingcap.tikv.expression._
 import com.pingcap.tikv.meta.{TiIndexInfo, TiTableInfo}
 import com.pingcap.tikv.predicates.PredicateUtils.expressionToIndexRanges
@@ -109,7 +109,7 @@ class StatisticsManagerSuite extends BaseTiSparkSuite {
     val eq1: Expression =
       equal(ColumnRef.create("tp_int", fDataIdxTbl), Constant.create(2006469139))
     val eq2: Expression = lessEqual(ColumnRef.create("tp_int", fDataIdxTbl), Constant.create(0))
-    val or: Expression = LogicalBinaryExpression.or(eq1, eq2)
+    val or: Expression = LogicalExpr.or(eq1, eq2)
 
     val expressions = ImmutableList.of(or)
     testSelectRowCount(expressions, idx, 46)
@@ -125,7 +125,7 @@ class StatisticsManagerSuite extends BaseTiSparkSuite {
       lessThan(ColumnRef.create("tp_int", fDataIdxTbl), Constant.create(5390653))
     val gt: Expression =
       greaterThan(ColumnRef.create("tp_int", fDataIdxTbl), Constant.create(-46759812))
-    val and: Expression = LogicalBinaryExpression.and(le1, gt)
+    val and: Expression = LogicalExpr.and(le1, gt)
 
     val expressions = ImmutableList.of(and)
     testSelectRowCount(expressions, idx, 5)
