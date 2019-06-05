@@ -92,7 +92,6 @@ class InsertSuite extends BaseDataSourceTest("test_datasource_upsert") {
     testTiDBSelect(Seq(row2_v2, row3_v2, row4_v2, row5_v2))
   }
 
-  // TODO: support auto increment
   ignore("Test upsert to table with primary key (auto increase case 2)") {
     val rowWithoutPK2 = Row("TiDB")
     val rowWithoutPK3 = Row("Spark")
