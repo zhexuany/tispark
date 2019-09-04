@@ -41,22 +41,18 @@ object TpchQuery {
     // change current db
     spark.sql(s"use $db")
     for (queryNo <- fromNum to toNum) {
+      val query =
+        Class
+          .forName(f"com.pingcap.tispark.tpch.Q$queryNo%02d")
+          .newInstance
+          .asInstanceOf[TpchQuery]
+      val t0 = System.nanoTime()
+      // print
+      query.execute(spark).collect().foreach(println)
 
-      if (queryNo != 15) {
-        val query =
-          Class
-            .forName(f"com.pingcap.tispark.tpch.Q$queryNo%02d")
-            .newInstance
-            .asInstanceOf[TpchQuery]
-        val t0 = System.nanoTime()
-        // print
-        query.execute(spark).collect().foreach(println)
-
-        val t1 = System.nanoTime()
-        val elapsed = (t1 - t0) / 1000000000.0f // second
-        results += Tuple2(query.getName, elapsed)
-      }
-
+      val t1 = System.nanoTime()
+      val elapsed = (t1 - t0) / 1000000000.0f // second
+      results += Tuple2(query.getName, elapsed)
     }
 
     results
