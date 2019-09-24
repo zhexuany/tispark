@@ -189,11 +189,13 @@ case class ColumnValueGenerator(dataType: ReflectedDataType,
         generateRandomBinary(r, getRandomLength(dataType, r))
       case DATE =>
         // start from 1000-01-01 to 9999-01-01
-        val milliseconds = -30610253143000L + (Math.abs(r.nextLong) % (9000L * 365 * 24 * 60 * 60 * 1000))
+//        val milliseconds = -30610253143000L + (Math.abs(r.nextLong) % (9000L * 365 * 24 * 60 * 60 * 1000))
+        val milliseconds = 45L * 365 * 24 * 60 * 60 * 1000L + (Math.abs(r.nextLong) % (4L * 365 * 24 * 60 * 60 * 1000))
         new java.sql.Date(milliseconds)
       case TIMESTAMP =>
         // start from 1970-01-01 00:00:01 to 2038-01-19 03:14:07
-        val milliseconds = Math.abs(r.nextInt * 1000L + 1000L) + Math.abs(r.nextInt(1000))
+//        val milliseconds = Math.abs(r.nextInt * 1000L + 1000L) + Math.abs(r.nextInt(1000))
+        val milliseconds = 45L * 365 * 24 * 60 * 60 * 1000L + (Math.abs(r.nextLong) % (4L * 365 * 24 * 60 * 60 * 1000))
         new java.sql.Timestamp(milliseconds)
       case _ => throw new RuntimeException(s"random $dataType generator not supported yet")
     }

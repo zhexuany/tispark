@@ -35,6 +35,7 @@ import org.scalatest.concurrent.Eventually
 import org.slf4j.Logger
 
 import scala.collection.mutable.ArrayBuffer
+import scala.tools.nsc.io.Directory
 
 /**
  * This trait manages basic TiSpark, Spark JDBC, TiDB JDBC
@@ -74,6 +75,8 @@ trait SharedSQLContext extends SparkFunSuite with Eventually with BeforeAndAfter
   protected def initializeTimeZone(): Unit = SharedSQLContext.initializeTimeZone()
 
   protected def defaultTimeZone: TimeZone = SharedSQLContext.timeZone
+
+  protected def enableTiFlashTest: Boolean = SharedSQLContext.enableTiFlashTest
 
   protected def refreshConnections(): Unit = SharedSQLContext.refreshConnections(false)
 
@@ -166,6 +169,7 @@ object SharedSQLContext extends Logging {
   protected var pdAddresses: String = _
   protected var generateData: Boolean = _
   protected var generateDataSeed: Option[Long] = None
+  protected var enableTiFlashTest: Boolean = _
 
   protected implicit def spark: SparkSession = _spark
 
@@ -232,7 +236,7 @@ object SharedSQLContext extends Logging {
     _tidbConnection.setCatalog("tispark_test")
     _statement = _tidbConnection.createStatement()
     logger.info("Analyzing table tispark_test.full_data_type_table_idx...")
-    _statement.execute("analyze table tispark_test.full_data_type_table_idx")
+//    _statement.execute("analyze table tispark_test.full_data_type_table_idx")
     logger.info("Analyzing table tispark_test.full_data_type_table...")
     _statement.execute("analyze table tispark_test.full_data_type_table")
     logger.info("Analyzing table finished.")
@@ -351,11 +355,19 @@ object SharedSQLContext extends Logging {
       if (shouldLoadData(loadData) && !forceNotLoad) {
         logger.info("Loading TiSparkTestData")
         // Load index test data
-        loadSQLFile("tispark-test", "IndexTest")
+//        loadSQLFile("tispark-test", "IndexTest")
         // Load expression test data
         loadSQLFile("tispark-test", "TiSparkTest")
         // Load TPC-H test data
         loadSQLFile("tispark-test", "TPCHData")
+        loadSQLFile("tispark-test", "UdafCount")
+        loadSQLFile("tispark-test", "UdafCountUnion")
+        loadSQLFile("tispark-test", "UdafAvg")
+        loadSQLFile("tispark-test", "UdafAvgUnion")
+        loadSQLFile("tispark-test", "UdafSum")
+        loadSQLFile("tispark-test", "UdafSumUnion")
+        loadSQLFile("tispark-test", "UdafMaxMin")
+        loadSQLFile("tispark-test", "UdafMaxMinUnion")
         // Load resolveLock test data
         loadSQLFile("resolveLock-test", "ddl")
         initStatistics()
@@ -385,6 +397,8 @@ object SharedSQLContext extends Logging {
       // run TPC-H tests by default and disable TPC-DS tests by default
       tpchDBName = getOrElse(prop, TPCH_DB_NAME, "tpch_test")
       tpcdsDBName = getOrElse(prop, TPCDS_DB_NAME, "")
+
+      enableTiFlashTest = getOrElse(prop, ENABLE_TIFLASH_TEST, "false").toBoolean
 
       runTPCH = tpchDBName != ""
       runTPCDS = tpcdsDBName != ""
