@@ -170,7 +170,9 @@ object TestDataGenerator {
                       table: String,
                       r: Random,
                       dataTypesWithDescription: List[(ReflectedDataType, String, String)],
-                      indices: List[Index]): Schema = {
+                      indices: List[Index],
+                      colNames: List[String] = List.empty[String]
+                     ): Schema = {
 
     // validation
     assert(
@@ -199,18 +201,23 @@ object TestDataGenerator {
     }
 
     val columnNames: List[String] =
-      dataTypesWithDescription.map { x =>
-        val tp = x._1
-        val ret = if (dataTypeMap(tp) == 1) {
-          generateColumnName(tp)
-        } else {
-          val cnt = dataTypeCountMap(tp)
-          dataTypeCountMap(tp) += 1
-          generateColumnName(tp, cnt)
+      if(colNames.isEmpty) {
+        dataTypesWithDescription.map { x =>
+          val tp = x._1
+          val ret = if (dataTypeMap(tp) == 1) {
+            generateColumnName(tp)
+          } else {
+            val cnt = dataTypeCountMap(tp)
+            dataTypeCountMap(tp) += 1
+            generateColumnName(tp, cnt)
+          }
+          columnNameToDataTypeMap(ret) = x
+          ret
         }
-        columnNameToDataTypeMap(ret) = x
-        ret
+      } else {
+        colNames
       }
+
 
     def extractFromTypeDesc(str: String): (Integer, Integer) = {
       if (str.isEmpty) {
