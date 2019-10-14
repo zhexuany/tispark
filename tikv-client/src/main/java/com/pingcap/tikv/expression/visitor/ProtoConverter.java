@@ -275,17 +275,15 @@ public class ProtoConverter extends Visitor<Expr, Object> {
     if (node.getValue() == null) {
       builder.setTp(ExprType.Null);
     } else {
-      // need cast timestamp to datetime to adopt tidb's behavior
-      //      if (type.getType() == MySQLType.TypeTimestamp) {
-      //        type = DataTypeFactory.of(MySQLType.TypeDatetime);
-      //      }
-
       builder.setTp(type.getProtoExprType());
       CodecDataOutput cdo = new CodecDataOutput();
       type.encode(cdo, EncodeType.PROTO, node.getValue());
       builder.setVal(cdo.toByteString());
     }
-    builder.setFieldType(toPBFieldType(getType(node)));
+    if (type.getType() == MySQLType.TypeTimestamp) {
+      type = DataTypeFactory.of(MySQLType.TypeDatetime);
+    }
+    builder.setFieldType(toPBFieldType(type));
     return builder.build();
   }
 
