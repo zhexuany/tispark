@@ -22,13 +22,14 @@ import com.pingcap.tikv.expression.ExpressionBlacklist
 import com.pingcap.tikv.expression.visitor.{MetaResolver, SupportedExpressionValidator}
 import com.pingcap.tikv.meta.{TiColumnInfo, TiDAGRequest, TiTableInfo}
 import com.pingcap.tikv.region.RegionStoreClient.RequestTypes
-import com.pingcap.tikv.types._
 import com.pingcap.tispark.{BasicExpression, TiConfigConst, TiDBRelation}
-import org.apache.spark.SparkConf
-import org.apache.spark.sql.DataFrame
+import org.apache.spark.sql.{DataFrame, Row}
+import org.apache.spark.sql.catalyst.InternalRow
 import org.apache.spark.sql.catalyst.expressions.aggregate._
-import org.apache.spark.sql.catalyst.expressions.{AttributeReference, Expression, Literal, NamedExpression}
+import org.apache.spark.sql.catalyst.expressions.{AttributeReference, Expression, GenericInternalRow, Literal, NamedExpression}
+import org.apache.spark.sql.execution.TiConverter
 import org.apache.spark.sql.types.{MetadataBuilder, StructField, StructType}
+import org.apache.spark.{SparkConf, sql}
 import org.tikv.kvproto.Kvrpcpb.{CommandPri, IsolationLevel}
 
 import scala.collection.JavaConversions._
@@ -198,6 +199,16 @@ object TiUtil {
       tiConf.setUseTiFlash(conf.get(TiConfigConst.USE_TIFLASH).toBoolean)
     }
 
+    if (conf.contains(TiConfigConst.USE_COLUMNAR)) {
+      tiConf.setUseColumnar(conf.get(TiConfigConst.USE_TIFLASH).toBoolean)
+    }
+
+    if (conf.contains(TiConfigConst.REGION_INDEX_SCAN_DOWNGRADE_THRESHOLD)) {
+      tiConf.setDowngradeThreshold(
+        conf.get(TiConfigConst.REGION_INDEX_SCAN_DOWNGRADE_THRESHOLD).toInt
+      );
+    }
+
     tiConf
   }
 
@@ -207,4 +218,16 @@ object TiUtil {
       val df = new DecimalFormat("#.#")
       s" EstimatedCount:${df.format(req.getEstimatedCount)}"
     } else ""
+
+  def rowToInternalRow(row: Row,
+                       outputTypes: Seq[sql.types.DataType],
+                       converters: Seq[Any => Any]): InternalRow = {
+    val mutableRow = new GenericInternalRow(outputTypes.length)
+    for (i <- outputTypes.indices) {
+      mutableRow(i) = converters(i)(row(i))
+    }
+
+    mutableRow
+  }
+
 }
