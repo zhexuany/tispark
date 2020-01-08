@@ -16,9 +16,19 @@
 package org.apache.spark.sql
 
 import com.pingcap.tispark.TiConfigConst
+import com.pingcap.tispark.tpcc.TPCCCsvReader
 import org.apache.spark.sql.functions.{col, sum}
 
 class IssueTestSuite extends BaseTiSparkTest {
+  test("csv loader") {
+    TPCCCsvReader(
+      "/Users/zhexuany/Desktop/tpcc_csv",
+      "/Users/zhexuany/Desktop/tpcc_csv2",
+      10,
+      "tpcc.bmsql_%s.%d.csv",
+      spark
+    )
+  }
   // https://github.com/pingcap/tispark/issues/1186
   test("Consider nulls order when performing TopN") {
     // table `full_data_type_table` contains a single line of nulls

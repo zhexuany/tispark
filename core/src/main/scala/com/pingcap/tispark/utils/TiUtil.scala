@@ -21,6 +21,7 @@ import com.pingcap.tikv.TiConfiguration
 import com.pingcap.tikv.datatype.TypeMapping
 import com.pingcap.tikv.meta.{TiDAGRequest, TiTableInfo}
 import com.pingcap.tikv.types._
+import com.pingcap.tispark.tpcc.TPCCCsvReader
 import com.pingcap.tispark.{TiConfigConst, _}
 import org.apache.spark.sql.catalyst.InternalRow
 import org.apache.spark.sql.catalyst.expressions.GenericInternalRow
