@@ -29,6 +29,7 @@ import org.slf4j.LoggerFactory
 import scala.collection.JavaConverters._
 
 object TiBatchWrite {
+  private final val logger = LoggerFactory.getLogger(getClass.getName)
   type SparkRow = org.apache.spark.sql.Row
   type TiRow = com.pingcap.tikv.row.Row
   type TiDataType = com.pingcap.tikv.types.DataType
@@ -43,6 +44,9 @@ object TiBatchWrite {
   def write(df: DataFrame, tiContext: TiContext, options: TiDBOptions): Unit = {
     val dataToWrite = Map(DBTable(options.database, options.table) -> df)
     new TiBatchWrite(dataToWrite, tiContext, options).write()
+    val sql = s"select count(*) from `${options.database}`.`${options.table}`"
+    logger.info("finishing the last stage of batch writing")
+    tiContext.sparkSession.sql(sql).collect()
   }
 
   @throws(classOf[NoSuchTableException])
@@ -314,16 +318,6 @@ class TiBatchWrite(
       logger.info("commitSecondaryKeys finish")
     } else {
       logger.info("skipping commit secondary key")
-    }
-
-    // hack: use tispark to resolve locks
-    tiBatchWriteTables.foreach { tiBatchWriteTable =>
-      val db = tiConf.getDBPrefix + tiBatchWriteTable.options.database
-      val table = tiBatchWriteTable.options.table
-      val sql = s"select count(*) from `$db`.`$table`"
-      logger.info("hack: use tispark to resolve locks")
-      logger.info(sql)
-      tiContext.sparkSession.sql(sql).show()
     }
   }
 
